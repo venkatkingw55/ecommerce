@@ -1,0 +1,29 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .database import engine, Base
+from .routes import router
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="Payment Service",
+    description="Order and payment processing service",
+    version="1.0.0",
+    root_path="/api/payments"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "payment-service"}
+
+
+app.include_router(router)

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: ecommerce
+data:
+  POSTGRES_USER: "postgres"
+  POSTGRES_DB: "postgres"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: ecommerce
+data:
+  init-databases.sh: |
+    #!/bin/bash
+    set -e
+
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+        CREATE DATABASE users_db;
+        CREATE DATABASE products_db;
+        CREATE DATABASE cart_db;
+        CREATE DATABASE payments_db;
+        
+        GRANT ALL PRIVILEGES ON DATABASE users_db TO $POSTGRES_USER;
+        GRANT ALL PRIVILEGES ON DATABASE products_db TO $POSTGRES_USER;
+        GRANT ALL PRIVILEGES ON DATABASE cart_db TO $POSTGRES_USER;
+        GRANT ALL PRIVILEGES ON DATABASE payments_db TO $POSTGRES_USER;
+    EOSQL
