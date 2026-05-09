@@ -1,0 +1,40 @@
+namespace: ecommerce
+
+replicaCount: 1
+
+image:
+  registry: us-central1-docker.pkg.dev/ia-securearmor/ecommerce
+  repository: cart-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8003
+
+database:
+  name: cart_db
+  host: postgres
+  port: 5432
+  user: postgres
+
+dependencies:
+  productServiceUrl: "http://product-service:8002"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 5

@@ -1,0 +1,37 @@
+namespace: ecommerce
+
+replicaCount: 1
+
+image:
+  registry: us-central1-docker.pkg.dev/ia-securearmor/ecommerce
+  repository: product-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8002
+
+database:
+  name: products_db
+  host: postgres
+  port: 5432
+  user: postgres
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 5

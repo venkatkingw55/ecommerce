@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ecommerce-infra
+description: Shared infrastructure - namespace, postgres, secrets, ingress
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,56 @@
+namespace: ecommerce
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+secrets:
+  jwtSecret: "your-super-secret-jwt-key-change-in-production"
+  postgresPassword: "postgres123"
+
+postgres:
+  replicas: 1
+  image:
+    repository: postgres
+    tag: 15-alpine
+  user: postgres
+  database: postgres
+  databases:
+    - users_db
+    - products_db
+    - cart_db
+    - payments_db
+  service:
+    port: 5432
+  storage:
+    size: 10Gi
+    storageClass: standard-rwo
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probes:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+services:
+  frontend:
+    port: 80
+  userService:
+    port: 8001
+  productService:
+    port: 8002
+  cartService:
+    port: 8003
+  paymentService:
+    port: 8004

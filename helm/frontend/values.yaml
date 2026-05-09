@@ -1,0 +1,31 @@
+namespace: ecommerce
+
+replicaCount: 2
+
+image:
+  registry: us-central1-docker.pkg.dev/ia-securearmor/ecommerce
+  repository: frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"
+
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 5
