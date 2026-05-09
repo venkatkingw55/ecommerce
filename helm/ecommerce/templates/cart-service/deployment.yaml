@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cart-service
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.cartService.replicaCount }}
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: {{ include "ecommerce.image" (dict "registry" $.Values.imageRegistry "repository" .Values.cartService.image.repository "tag" .Values.cartService.image.tag) }}
+          imagePullPolicy: {{ .Values.cartService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.cartService.service.port }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: {{ include "ecommerce.databaseUrl" (dict "user" $.Values.postgres.user "passwordEnvVar" "POSTGRES_PASSWORD" "port" $.Values.postgres.service.port "database" .Values.cartService.database) | quote }}
+            - name: PRODUCT_SERVICE_URL
+              value: "http://product-service:{{ .Values.productService.service.port }}"
+          resources:
+            {{- toYaml .Values.cartService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.cartService.probes.liveness.path }}
+              port: {{ .Values.cartService.service.port }}
+            initialDelaySeconds: {{ .Values.cartService.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.cartService.probes.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.cartService.probes.readiness.path }}
+              port: {{ .Values.cartService.service.port }}
+            initialDelaySeconds: {{ .Values.cartService.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.cartService.probes.readiness.periodSeconds }}

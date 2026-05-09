@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cart-service
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.cartService.service.type }}
+  selector:
+    app: cart-service
+  ports:
+    - port: {{ .Values.cartService.service.port }}
+      targetPort: {{ .Values.cartService.service.port }}
+      name: http
